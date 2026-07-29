@@ -22,9 +22,9 @@ public class ClienteService {
     @Transactional
     public ClienteResponseDTO criar(ClienteRequestDTO request) {
         validarCpfCnpjNovo(request.cpfCnpj());
-        ClienteModel cliente = new ClienteModel();
-        preencher(cliente, request);
-        return ClienteResponseDTO.from(clienteRepository.save(cliente));
+        ClienteModel novoCliente = new ClienteModel();
+        preencher(novoCliente, request);
+        return ClienteResponseDTO.from(clienteRepository.save(novoCliente));
     }
 
     @Transactional(readOnly = true)

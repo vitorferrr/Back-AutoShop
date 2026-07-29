@@ -59,4 +59,5 @@ public class VeiculoController {
     public void excluir(@PathVariable Long id) {
         veiculoService.excluir(id);
     }
+    
 }

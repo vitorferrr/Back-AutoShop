@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ServicoService {
+
     private final ServicoRepository servicoRepository;
 
     @Transactional
@@ -29,7 +30,8 @@ public class ServicoService {
 
     @Transactional(readOnly = true)
     public Page<ServicoResponseDTO> listar(String busca, Pageable pageable) {
-        return servicoRepository.buscar(busca == null ? null : busca.trim(), pageable).map(ServicoResponseDTO::from);
+        return servicoRepository.buscar(busca == null ? null : busca.trim(), pageable)
+                .map(ServicoResponseDTO::from);
     }
 
     @Transactional(readOnly = true)
@@ -44,6 +46,17 @@ public class ServicoService {
         return ServicoResponseDTO.from(servicoRepository.save(servico));
     }
 
+    /**
+     * Alterna o estado ativo/inativo do serviço.
+     * Se estava ativo, passa para inativo. Se estava inativo, passa para ativo.
+     */
+    @Transactional
+    public ServicoResponseDTO toggleAtivo(Long id) {
+        ServicoModel servico = buscarModelPorId(id);
+        servico.setAtivo(!Boolean.TRUE.equals(servico.getAtivo()));
+        return ServicoResponseDTO.from(servicoRepository.save(servico));
+    }
+
     @Transactional
     public void excluir(Long id) {
         if (!servicoRepository.existsById(id)) {
@@ -54,7 +67,8 @@ public class ServicoService {
 
     public ServicoModel buscarModelPorId(Long id) {
         return servicoRepository.findById(id)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Serviço não encontrado com id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Serviço não encontrado com id: " + id));
     }
 
     private void preencher(ServicoModel servico, ServicoRequestDTO request) {

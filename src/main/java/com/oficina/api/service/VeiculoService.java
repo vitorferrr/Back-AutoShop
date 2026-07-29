@@ -1,5 +1,7 @@
 package com.oficina.api.service;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class VeiculoService {
+
     private final VeiculoRepository veiculoRepository;
     private final ClienteService clienteService;
 
@@ -31,7 +34,21 @@ public class VeiculoService {
 
     @Transactional(readOnly = true)
     public Page<VeiculoResponseDTO> listar(String busca, Long clienteId, Pageable pageable) {
-        return veiculoRepository.buscar(normalizarBusca(busca), clienteId, pageable).map(VeiculoResponseDTO::from);
+        return veiculoRepository.buscar(normalizarBusca(busca), clienteId, pageable)
+                .map(VeiculoResponseDTO::from);
+    }
+
+    /**
+     * Retorna todos os veículos de um cliente sem paginação e
+     * valida que o cliente existe antes de buscar os veículos.
+     */
+    @Transactional(readOnly = true)
+    public List<VeiculoResponseDTO> listarPorCliente(Long clienteId) {
+        clienteService.buscarModelPorId(clienteId);
+        return veiculoRepository.findByClienteId(clienteId)
+                .stream()
+                .map(VeiculoResponseDTO::from)
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -60,7 +77,8 @@ public class VeiculoService {
 
     public VeiculoModel buscarModelPorId(Long id) {
         return veiculoRepository.findById(id)
-            .orElseThrow(() -> new RecursoNaoEncontradoException("Veículo não encontrado com id: " + id));
+                .orElseThrow(() -> new RecursoNaoEncontradoException(
+                        "Veículo não encontrado com id: " + id));
     }
 
     private void preencher(VeiculoModel veiculo, VeiculoRequestDTO request) {
